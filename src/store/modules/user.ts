@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { useLockscreenStore } from './lockscreen';
 import { useSSEStore } from './sse';
+import { useKeepAliveStore } from './keepAlive';
 import type { RouteRecordRaw } from 'vue-router';
 import { store } from '@/store';
 import Api from '@/api/';
@@ -13,6 +14,7 @@ export const useUserStore = defineStore(
   () => {
     const sseStore = useSSEStore();
     const lockscreenStore = useLockscreenStore();
+    const keepAliveStore = useKeepAliveStore();
     const token = ref<string>();
     const perms = ref<string[]>([]);
     const menus = ref<RouteRecordRaw[]>([]);
@@ -39,6 +41,7 @@ export const useUserStore = defineStore(
       resetRouter();
       sseStore.closeEventSource();
       lockscreenStore.setLock(false);
+      keepAliveStore.clear();
       localStorage.clear();
     };
     /** 登录成功保存token */

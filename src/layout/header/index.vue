@@ -70,7 +70,6 @@
   import { Search, FullScreen, ProjectSetting, LayoutBreadcrumb } from './components/';
   import { LocalePicker } from '@/components/basic/locale-picker';
   import { useUserStore } from '@/store/modules/user';
-  import { useKeepAliveStore } from '@/store/modules/keepAlive';
   import { useLockscreenStore } from '@/store/modules/lockscreen';
   import { LOGIN_NAME } from '@/router/constant';
   import { useLayoutSettingStore } from '@/store/modules/layoutSetting';
@@ -87,7 +86,6 @@
   const userStore = useUserStore();
   const layoutSettingStore = useLayoutSettingStore();
   const lockscreenStore = useLockscreenStore();
-  const keepAliveStore = useKeepAliveStore();
 
   const router = useRouter();
   const route = useRoute();
@@ -109,7 +107,6 @@
       centered: true,
       onOk: async () => {
         await userStore.logout();
-        keepAliveStore.clear();
         message.success('成功退出登录');
         router.replace({
           name: LOGIN_NAME,

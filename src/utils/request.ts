@@ -6,6 +6,8 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ResultEnum } from '@/enums/httpEnum';
 import { useUserStore } from '@/store/modules/user';
 import { useSSEStore } from '@/store/modules/sse';
+import { router } from '@/router';
+import { LOGIN_NAME } from '@/router/constant';
 
 export interface RequestOptions extends AxiosRequestConfig {
   /** 是否直接将数据从响应中提取出，例如直接返回 res.data，而忽略 res.code 等信息 */
@@ -72,7 +74,7 @@ service.interceptors.response.use(
           onOk: () => {
             const userStore = useUserStore();
             userStore.clearLoginStatus();
-            window.location.reload();
+            router.replace({ name: LOGIN_NAME });
           },
         });
       }
