@@ -171,6 +171,11 @@ export const str2tree = (str: string, treeData: DataNode[] = [], separator = ':'
   }, treeData);
 };
 
+/**
+ * @description 转义正则表达式中的特殊字符，用于将用户输入安全地拼入正则表达式
+ * @param str - 需要转义的原始字符串
+ * @returns 转义后的安全字符串，可直接用于 new RegExp()
+ */
 export const escapeRegExp = (str: string): string => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };

@@ -75,7 +75,7 @@
       return;
     }
     list.value = originList.filter((item) => {
-      return keys.every((k) => !params[k] || (item[k] != null && String(item[k]).includes(params[k])));
+      return keys.every((k) => !params[k] || (item[k] != null && String(item[k]).includes(String(params[k]))));
     });
   };
 
