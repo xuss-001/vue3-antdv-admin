@@ -4,6 +4,7 @@ import MD5 from 'crypto-js/md5';
 import { useIdle } from '@vueuse/core';
 import { useRoute } from 'vue-router';
 import { store } from '@/store';
+import { useUserStoreWithOut } from './user';
 import { LOGIN_NAME } from '@/router/constant';
 
 // 长时间不操作默认锁屏时间
@@ -18,6 +19,7 @@ export const useLockscreenStore = defineStore(
   'lockscreen',
   () => {
     const route = useRoute();
+    const userStore = useUserStoreWithOut();
     const { idle } = useIdle(initTime); // 5 min
     const loginPwd = ref('');
     const lockPwd = ref('');
@@ -51,7 +53,7 @@ export const useLockscreenStore = defineStore(
       return [lockPwd, loginPwd].some((n) => n.value === inputPwd);
     };
 
-    if (isLock.value && !lockPwd.value) {
+    if (userStore.token && isLock.value && !lockPwd.value) {
       setLock(false);
     }
 
