@@ -117,6 +117,15 @@ export const useTabsViewStore = defineStore(
       }
     };
 
+    if (!layoutSettingStore.layoutSetting.cacheTabs) {
+      if (isInRouteExcludes(currentRoute)) {
+        tabsList.value = [tabsList.value[0]];
+      } else {
+        tabsList.value = [getCurrentTab.value || tabsList.value[0]];
+      }
+      tabsList.value = tabsList.value.filter(Boolean);
+    }
+
     watch(
       () => currentRoute.fullPath,
       () => {
@@ -124,17 +133,6 @@ export const useTabsViewStore = defineStore(
       },
       { immediate: true },
     );
-
-    window.addEventListener('beforeunload', () => {
-      if (!layoutSettingStore.layoutSetting.cacheTabs) {
-        if (isInRouteExcludes(currentRoute)) {
-          tabsList.value = [tabsList.value[0]];
-        } else {
-          tabsList.value = [getCurrentTab.value || tabsList.value[0]];
-        }
-        tabsList.value = tabsList.value.filter(Boolean);
-      }
-    });
 
     return {
       tabsList,

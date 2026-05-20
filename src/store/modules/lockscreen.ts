@@ -51,11 +51,9 @@ export const useLockscreenStore = defineStore(
       return [lockPwd, loginPwd].some((n) => n.value === inputPwd);
     };
 
-    window.addEventListener('beforeunload', () => {
-      if (isLock.value && !lockPwd.value) {
-        setLock(false);
-      }
-    });
+    if (isLock.value && !lockPwd.value) {
+      setLock(false);
+    }
 
     watch(idle, (idleValue) => {
       if (route.name === LOGIN_NAME) {

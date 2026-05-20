@@ -1,0 +1,49 @@
+【题目基础信息】
+题目编号: vue3-antdv-admin-Bug-1
+github地址: https://github.com/xuss-001/vue3-antdv-admin
+分支名称: fix/unify-logout-cleanup
+任务难度: 中等
+任务类型: Bug修复
+业务领域: Web前端
+总轮次: 2
+最终状态: 完成满意
+
+============================================
+【第 1 轮记录】
+User Prompt:
+我发现项目里有个问题：在 request.ts 的响应拦截器中，token 过期（code 1101/1105）时直接用 localStorage.clear() 然后 window.location.reload() 暴力刷页面，完全没有走 store 的 clearLoginStatus 统一清理逻辑；而且 user store 里的 clearLoginStatus 方法用了个 setTimeout(() => { localStorage.clear(); }) 来延迟清空 localStorage，这种写法不太可靠。能不能把两处的登出/清理逻辑统一一下？具体来说：
+1. request.ts 中 token 过期的处理改用 store 的 clearLoginStatus 来清理状态
+2. user store 的 clearLoginStatus 去掉那个 setTimeout 的 hack，改为直接同步清理，并且内部复用已有的 setToken('') 而不是直接修改 token.value
+3. 确保 router-guards 等其他地方调用 clearLoginStatus 时行为一致
+
+修改范围: 跨模块多文件
+任务是否完成: 未完成任务
+产物及过程是否满意: 不满意
+不满意原因:
+产物不满意：①request.ts 中 token 过期处理后仍保留了 window.location.reload()，既然 clearLoginStatus 已经完整清理了状态，这个 reload 可能导致页面重载后 pinia persist 插件恢复旧的 tabsList 等脏数据；②header 退出登录时 keepAliveStore.clear() 在 logout 之前单独调用，没有纳入 clearLoginStatus 统一管理，导致不同退出路径（token 过期 vs 手动退出）对 keepAlive 的处理不一致。
+过程不满意：①期望 Trae 梳理所有调用 clearLoginStatus 的地方（router-guards 的 afterLogin 失败场景、header 手动退出等）并检查每处的调用上下文是否一致，但 router-guards.ts 完全没有被审查和修改；②期望一并检查 tabsView/lockscreen 的 beforeunload 事件监听中是否有类似 localStorage 操作需要纳入统一清理，但这部分也被忽略了。
+
+备注: 第1轮留可挑剔空间
+
+============================================
+【第 2 轮记录】
+User Prompt:
+现在 clearLoginStatus 改得不错，去掉了 setTimeout 并且统一了 token 的清理方式。但我发现还漏了几个地方：
+1. request.ts 里 token 过期处理虽然现在调用了 clearLoginStatus()，但后面还保留着 window.location.reload()，既然 clearLoginStatus 已经把状态都清理干净了，这个硬 reload 其实没必要，反而可能导致 pinia persist 插件在页面重载后把旧的 tabsList 恢复回来。应该改成跳转到登录页就行。
+2. layout/header/index.vue 手动退出登录时，keepAliveStore.clear() 是在 logout 之前单独调用的，而 clearLoginStatus 里面已经做了 resetRouter + SSE清理 + 锁屏重置，却唯独没管 keepAlive 的清理。这样不同退出路径（token 过期 vs 手动退出）对 keepAlive 的处理是不一致的。应该把 keepAliveStore.clear() 也纳入 clearLoginStatus 统一处理。
+3. router-guards.ts 里 afterLogin 失败时也调了 clearLoginStatus()，这个场景下的清理流程能不能也顺带检查一下，看看回调链路是否完整？
+
+修改范围: 跨模块多文件
+任务是否完成: 完成了任务
+产物及过程是否满意: 满意
+不满意原因: 无
+
+备注: 第2轮完成满意
+
+============================================
+【题目总结】
+题目编号: vue3-antdv-admin-Bug-1
+总轮次: 2
+最终状态: 完成满意
+总结: 本题统一了项目中登出/清理逻辑的不一致问题。第1轮改进了 clearLoginStatus（去 setTimeout、复用 setToken、新增 sseStore/lockscreenStore 清理）并让 request.ts 的 token 过期处理走统一方法。第2轮进一步将 keepAlive 清理纳入 clearLoginStatus、request.ts 不再暴力 reload 而是跳转登录页，实现了三种退出路径（token过期/手动退出/afterLogin失败）的行为一致性。
+
