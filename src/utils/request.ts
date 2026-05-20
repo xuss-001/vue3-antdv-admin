@@ -70,7 +70,8 @@ service.interceptors.response.use(
           okText: '重新登录',
           cancelText: '取消',
           onOk: () => {
-            localStorage.clear();
+            const userStore = useUserStore();
+            userStore.clearLoginStatus();
             window.location.reload();
           },
         });

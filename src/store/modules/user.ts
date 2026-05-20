@@ -32,14 +32,14 @@ export const useUserStore = defineStore(
 
     /** 清空登录态(token、userInfo...) */
     const clearLoginStatus = () => {
-      token.value = '';
+      setToken('');
       perms.value = [];
       menus.value = [];
       userInfo.value = {};
       resetRouter();
-      setTimeout(() => {
-        localStorage.clear();
-      });
+      sseStore.closeEventSource();
+      lockscreenStore.setLock(false);
+      localStorage.clear();
     };
     /** 登录成功保存token */
     const setToken = (_token: string) => {
@@ -84,7 +84,6 @@ export const useUserStore = defineStore(
     /** 登出 */
     const logout = async () => {
       await Api.account.accountLogout();
-      sseStore.closeEventSource();
       clearLoginStatus();
     };
 
