@@ -65,11 +65,17 @@ export const useUserStore = defineStore(
         const userInfoData = await accountProfile();
         userInfo.value = userInfoData;
       } catch (error) {
-        console.warn('获取用户信息失败，使用空对象兜底', error);
+        console.error('获取用户信息失败，终止后续流程', error);
         userInfo.value = {};
+        return;
       }
 
-      await fetchPermsAndMenus();
+      try {
+        await fetchPermsAndMenus();
+      } catch (error) {
+        console.error('获取菜单失败，终止后续流程', error);
+        return;
+      }
 
       try {
         sseStore.initServerMsgListener();
