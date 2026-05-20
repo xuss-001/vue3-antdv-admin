@@ -66,7 +66,7 @@
   import { getRenameSchemas } from './formSchemas';
   import type { TableRowSelection } from 'ant-design-vue/es/table/interface';
   import { Api } from '@/api/';
-  import { parseMimeTypeToIconName } from '@/utils';
+  import { parseMimeTypeToIconName, escapeRegExp } from '@/utils';
   import { useFormModal } from '@/hooks/useModal';
   import { createContextMenu } from '@/components/basic/context-menu';
   import { useTable } from '@/components/core/dynamic-table';
@@ -117,8 +117,9 @@
   };
 
   const hignlightSearchKey = (name: string) => {
+    const escapedKey = escapeRegExp(localSearchKey.value || '');
     return name.replace(
-      new RegExp(`${localSearchKey.value}`, 'g'),
+      new RegExp(escapedKey, 'g'),
       `<span style='color: red;'>${localSearchKey.value}</span>`,
     );
   };

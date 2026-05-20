@@ -170,3 +170,7 @@ export const str2tree = (str: string, treeData: DataNode[] = [], separator = ':'
     }
   }, treeData);
 };
+
+export const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};

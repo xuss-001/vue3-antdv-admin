@@ -1,6 +1,7 @@
 import { intersectionWith, isEqual, mergeWith, unionWith } from 'lodash-es';
 import { isArray, isObject } from './is';
 import type { App, Component, Plugin } from 'vue';
+export * from './common';
 
 export function getFileExtension(filename) {
   return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)?.[0] : undefined;
