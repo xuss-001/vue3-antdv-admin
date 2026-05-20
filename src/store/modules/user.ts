@@ -59,25 +59,43 @@ export const useUserStore = defineStore(
     };
     /** 登录成功之后, 获取用户信息以及生成权限路由 */
     const afterLogin = async () => {
-      try {
-        const { accountProfile } = Api.account;
-        // const wsStore = useWsStore();
-        const userInfoData = await accountProfile();
+      const { accountProfile } = Api.account;
 
+      try {
+        const userInfoData = await accountProfile();
         userInfo.value = userInfoData;
-        await fetchPermsAndMenus();
+      } catch (error) {
+        console.warn('获取用户信息失败，使用空对象兜底', error);
+        userInfo.value = {};
+      }
+
+      await fetchPermsAndMenus();
+
+      try {
         sseStore.initServerMsgListener();
       } catch (error) {
-        return Promise.reject(error);
-        // return logout();
+        console.warn('初始化SSE连接失败', error);
       }
     };
     /** 获取权限及菜单 */
     const fetchPermsAndMenus = async () => {
       const { accountPermissions, accountMenu } = Api.account;
-      // const wsStore = useWsStore();
-      const [menusData, permsData] = await Promise.all([accountMenu(), accountPermissions()]);
+      const [menusResult, permsResult] = await Promise.allSettled([accountMenu(), accountPermissions()]);
+
+      if (menusResult.status === 'rejected') {
+        console.error('获取菜单失败', menusResult.reason);
+        throw menusResult.reason;
+      }
+      const menusData = menusResult.value;
+
+      let permsData: string[] = [];
+      if (permsResult.status === 'fulfilled') {
+        permsData = permsResult.value;
+      } else {
+        console.warn('获取权限失败，使用空数组兜底', permsResult.reason);
+      }
       perms.value = permsData;
+
       const result = generateDynamicRoutes(menusData as unknown as RouteRecordRaw[]);
       menus.value = sortMenus(result);
     };

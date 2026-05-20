@@ -28,7 +28,7 @@ export function createRouterGuards(router: Router, whiteNameList: WhiteNameList)
         if (userStore.menus.length === 0) {
           // 从后台获取菜单
           const [err] = await _to(userStore.afterLogin());
-          if (err) {
+          if (err && userStore.menus.length === 0) {
             userStore.clearLoginStatus();
             Modal.destroyAll();
             return next({ name: LOGIN_NAME });

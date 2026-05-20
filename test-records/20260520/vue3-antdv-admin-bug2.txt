@@ -1,0 +1,25 @@
+【题目基础信息】
+题目编号: vue3-antdv-admin-Bug-2
+github地址: https://github.com/xuss-001/vue3-antdv-admin
+分支名称: fix/promise-all-fault-tolerance
+任务难度: 中等
+任务类型: Bug修复
+业务领域: Web前端
+总轮次: 待定
+最终状态: 进行中
+
+============================================
+【第 1 轮记录】
+User Prompt:
+我发现项目里有个问题：store/modules/user.ts 的 fetchPermsAndMenus 方法里用 Promise.all 同时请求菜单和权限两个接口，只要任意一个接口报错，整个 Promise.all 就失败了，然后 afterLogin 跟着抛错，最终 router-guards.ts 里的路由守卫会调用 clearLoginStatus() 把用户踢到登录页。能不能改成更宽容的处理方式？比如用 Promise.allSettled，权限失败给空数组兜底，菜单失败了才报错。另外 router-guards.ts 里 afterLogin 失败后的处理也顺便看一下。
+
+修改范围: 跨模块多文件
+任务是否完成: 未完成任务
+产物及过程是否满意: 不满意
+不满意原因:
+产物不满意：①afterLogin 中 accountProfile 失败后仍继续执行 fetchPermsAndMenus 和 SSE 初始化，但 userInfo.id 为空导致 SSE 静默跳过，行为不够明确——期望 accountProfile 失败时对后续依赖 userInfo.id 的步骤（如 SSE）有显式的跳过逻辑；②fetchPermsAndMenus 菜单失败时抛错的链路依赖 router-guards 隐式兜底，afterLogin 本身没有对 fetchPermsAndMenus 的失败做 try-catch，调用链不够清晰。
+过程不满意：①期望 afterLogin 对 accountProfile 失败后的处理策略有更明确的决策（是继续执行还是中断），但实际只是 console.warn + 空对象兜底，没有体现对下游步骤的考量；②期望 allSettled 后对每个 API 结果的处理有更丰富的错误上下文信息（如记录具体 API 名称），目前只用通用的 console.error/warn。
+
+备注: 第1轮留可挑剔空间
+
+============================================
